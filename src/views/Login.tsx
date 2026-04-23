@@ -2,17 +2,30 @@ import React, { useState } from 'react';
 import { Box, TextField, Button, Typography, Paper } from '@mui/material';
 
 interface LoginProps {
+  logInApi: (credentials: any) => Promise<any>;
   onLogin: () => void;
 }
 
-const Login: React.FC<LoginProps> = ({ onLogin }) => {
+
+
+
+const Login: React.FC<LoginProps> = ({ onLogin , logInApi}) => {
   const [user, setUser] = useState<string>('');
   const [password, setPassword] = useState<string>('');
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (user.trim() && password.trim()) {
-      onLogin();
+
+      const res = await logInApi({username:user, password:password})
+      if(res.isLogin === true){
+        onLogin();
+      }else{
+        alert("credenciales incorrectas")
+      }
+    }else{
+
+      alert("Valores vacios")
     }
   };
 
