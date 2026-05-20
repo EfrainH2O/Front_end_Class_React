@@ -20,11 +20,15 @@ function App() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password })
     });
-    return await res.json();
+    const data = await res.json();
+    if (data.token) localStorage.setItem("token", data.token);
+    return data;
   };
 
   const fetchUsers = async () => {
-    const res = await fetch(API_URL + "/users");
+    const res = await fetch(API_URL + "/users", {
+      headers: { "Authorization": localStorage.getItem("token") || "" }
+    });
     const data = await res.json();
     setUsers(data);
   };
@@ -32,7 +36,10 @@ function App() {
   const DelUser = async (idUser: string) => {
     const res = await fetch(API_URL + "/user", {
       method: "DELETE",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": localStorage.getItem("token") || ""
+      },
       body: JSON.stringify({ id: idUser })
     });
     await res.json();
@@ -40,17 +47,18 @@ function App() {
   };
 
   const Adduser = async (newUser: FullUserData) =>{
-
     const realUser: UserData = {
                 userName: newUser.username,
                 name: newUser.name,
                 _id : "1"
             };
 
-
     const res = await fetch(API_URL + "/users", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": localStorage.getItem("token") || ""
+      },
       body: JSON.stringify(newUser)
     });
     await res.json();
@@ -59,7 +67,10 @@ function App() {
   }
 
   const login = () => setIsAuthenticated(true);
-  const logout = () => setIsAuthenticated(false);
+  const logout = () => {
+    setIsAuthenticated(false);
+    localStorage.removeItem("token");
+  };
 
   useEffect(() => {
     if (isAuthenticated) {
