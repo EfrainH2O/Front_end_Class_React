@@ -8,7 +8,7 @@ import { Dashboard } from './views/Dashboard';
 import Admin from './views/Admin';
 import type { FullUserData, UserData } from './types';
 
-const API_URL = "http://localhost:3200";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3200";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
