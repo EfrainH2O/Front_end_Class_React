@@ -7,10 +7,13 @@ import { Home } from './views/Home';
 import { Dashboard } from './views/Dashboard';
 import Admin from './views/Admin';
 import type { FullUserData, UserData } from './types';
+import LifeCycle from './components/LifeCycle';
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3200";
 
 function App() {
+
+  const [showComponent, setShow] = useState<boolean> (true);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [users, setUsers] = useState<UserData[]>([]);
 
@@ -79,6 +82,7 @@ function App() {
   }, [isAuthenticated]);
 
   return (
+    <div>
     <BrowserRouter>
       <CssBaseline />
       <Navbar onLogout={logout} />
@@ -103,8 +107,18 @@ function App() {
           element={isAuthenticated ? <Admin users={users} delUser={DelUser} addUser={Adduser}/> : <Navigate to="/" />} 
         />
       </Routes>
+      
     </BrowserRouter>
+      <div>
+        {showComponent && <LifeCycle/>}
+        <button onClick={()=>setShow(!showComponent)}>
+          {showComponent? "ocultar" : "mostrar"}
+        </button>
+      </div>
+    </div>
   );
+
 }
+
 
 export default App;

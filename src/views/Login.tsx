@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Box, TextField, Button, Typography, Paper } from '@mui/material';
+import LifeCycle from '../components/LifeCycle';
 
 interface LoginProps {
   logInApi: (credentials: any) => Promise<any>;
