@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { CssBaseline } from '@mui/material';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
@@ -6,119 +6,57 @@ import Login from './views/Login';
 import { Home } from './views/Home';
 import { Dashboard } from './views/Dashboard';
 import Admin from './views/Admin';
-import type { FullUserData, UserData } from './types';
+import UserDetail from './views/UserDetail';
 import LifeCycle from './components/LifeCycle';
-
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3200";
+import { useAuth } from './hooks/useAuth';
+import { useAdmin } from './hooks/useAdmin';
 
 function App() {
-
-  const [showComponent, setShow] = useState<boolean> (true);
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [users, setUsers] = useState<UserData[]>([]);
-
-  const LogInFunction = async ({ username, password }: { username: string; password: string }) => {
-    const res = await fetch(API_URL + "/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password })
-    });
-    const data = await res.json();
-    if (data.token) localStorage.setItem("token", data.token);
-    return data;
-  };
-
-  const fetchUsers = async () => {
-    const res = await fetch(API_URL + "/users", {
-      headers: { "Authorization": localStorage.getItem("token") || "" }
-    });
-    const data = await res.json();
-    setUsers(data);
-  };
-
-  const DelUser = async (idUser: string) => {
-    const res = await fetch(API_URL + "/user", {
-      method: "DELETE",
-      headers: { 
-        "Content-Type": "application/json",
-        "Authorization": localStorage.getItem("token") || ""
-      },
-      body: JSON.stringify({ id: idUser })
-    });
-    await res.json();
-    setUsers(users.filter((u) => u._id !== idUser));
-  };
-
-  const Adduser = async (newUser: FullUserData) =>{
-    const realUser: UserData = {
-                userName: newUser.username,
-                name: newUser.name,
-                _id : "1"
-            };
-
-    const res = await fetch(API_URL + "/users", {
-      method: "POST",
-      headers: { 
-        "Content-Type": "application/json",
-        "Authorization": localStorage.getItem("token") || ""
-      },
-      body: JSON.stringify(newUser)
-    });
-    await res.json();
-    setUsers([...users, realUser]);
-    return newUser;
-  }
-
-  const login = () => setIsAuthenticated(true);
-  const logout = () => {
-    setIsAuthenticated(false);
-    localStorage.removeItem("token");
-  };
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      fetchUsers();
-    }
-  }, [isAuthenticated]);
+  const [showComponent, setShow] = useState<boolean>(true);
+  const { isAuthenticated, login, logout, logInApi } = useAuth();
+  const { users, delUser, addUser } = useAdmin(isAuthenticated);
 
   return (
     <div>
-    <BrowserRouter>
-      <CssBaseline />
-      <Navbar onLogout={logout} />
+      <BrowserRouter>
+        <CssBaseline />
+        <Navbar onLogout={logout} />
 
-      <Routes>
-        <Route 
-          path="/" 
-          element={!isAuthenticated ? <Login onLogin={login} logInApi={LogInFunction} /> : <Navigate to="/home" />} 
-        />
-        
-        <Route 
-          path="/home" 
-          element={isAuthenticated ? <Home /> : <Navigate to="/" />} 
-        />
-        <Route 
-          path="/dashboard" 
-          element={isAuthenticated ? <Dashboard /> : <Navigate to="/" />} 
-        />
+        <Routes>
+          <Route 
+            path="/" 
+            element={!isAuthenticated ? <Login onLogin={login} logInApi={logInApi} /> : <Navigate to="/home" />} 
+          />
+          
+          <Route 
+            path="/home" 
+            element={isAuthenticated ? <Home /> : <Navigate to="/" />} 
+          />
+          <Route 
+            path="/dashboard" 
+            element={isAuthenticated ? <Dashboard /> : <Navigate to="/" />} 
+          />
 
-        <Route 
-          path="/admin" 
-          element={isAuthenticated ? <Admin users={users} delUser={DelUser} addUser={Adduser}/> : <Navigate to="/" />} 
-        />
-      </Routes>
-      
-    </BrowserRouter>
-      <div>
+          <Route 
+            path="/admin" 
+            element={isAuthenticated ? <Admin users={users} delUser={delUser} addUser={addUser}/> : <Navigate to="/" />} 
+          />
+
+          <Route 
+            path="/user/:id" 
+            element={isAuthenticated ? <UserDetail users={users} /> : <Navigate to="/" />} 
+          />
+        </Routes>
+      </BrowserRouter>
+
+      <div style={{ padding: '20px' }}>
         {showComponent && <LifeCycle/>}
-        <button onClick={()=>setShow(!showComponent)}>
-          {showComponent? "ocultar" : "mostrar"}
+        <button onClick={() => setShow(!showComponent)}>
+          {showComponent ? "Ocultar Ciclo de Vida" : "Mostrar Ciclo de Vida"}
         </button>
       </div>
     </div>
   );
-
 }
-
 
 export default App;

@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Box, TextField, Button, Typography, Paper } from '@mui/material';
-import LifeCycle from '../components/LifeCycle';
+// import LifeCycle from '../components/LifeCycle';
 
 interface LoginProps {
   logInApi: (credentials: any) => Promise<any>;
-  onLogin: () => void;
+  onLogin: (token: string) => void;
 }
 
 
@@ -19,8 +19,8 @@ const Login: React.FC<LoginProps> = ({ onLogin , logInApi}) => {
     if (user.trim() && password.trim()) {
 
       const res = await logInApi({username:user, password:password})
-      if(res.isLogin === true){
-        onLogin();
+      if(res.isLogin === true && res.token){
+        onLogin(res.token);
       }else{
         alert("credenciales incorrectas")
       }
